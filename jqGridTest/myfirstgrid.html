@@ -20,35 +20,102 @@ html, body {
 }
 </style>
  
-<script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script src="js/i18n/grid.locale-en.js" type="text/javascript"></script>
 <script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
  
 <script type="text/javascript">
 $(function () {
-    $("#list").jqGrid({
-        url: "example.php",
-        datatype: "xml",
-        mtype: "GET",
-        colNames: ["Inv No", "Date", "Amount", "Tax", "Total", "Notes"],
-        colModel: [
-            { name: "invid", width: 55 },
-            { name: "invdate", width: 90 },
-            { name: "amount", width: 80, align: "right" },
-            { name: "tax", width: 80, align: "right" },
-            { name: "total", width: 80, align: "right" },
-            { name: "note", width: 150, sortable: false }
-        ],
-        pager: "#pager",
-        rowNum: 10,
-        rowList: [10, 20, 30],
-        sortname: "invid",
-        sortorder: "desc",
-        viewrecords: true,
-        gridview: true,
-        autoencode: true,
-        caption: "My first grid"
-    }); 
+    var gridData = [];
+    var currRow;
+    for (var i = 0; i < 12; i++) {
+        var dayOfHour = i + "";
+        currRow = {
+            id: i,
+            dayOfHour: dayOfHour,
+            date: "2015-04-" + Math.ceil((i + 1) * 30 / 5000),
+            name: "Client" + i,
+            amount: i,
+            tax: i * 0.18,
+            interest: Math.random(),
+            total: i + i * 0.18,
+            note: "note here" + i,
+            note2: "note here" + i,
+            note3: "note here" + i,
+            note4: "note here" + i
+        };
+        gridData.push(currRow);
+    }
+
+        var gridOptions = {
+            data: gridData,
+            datatype: "local",
+            cellSize: "sm",
+            colNames: ["Inv No", "Day of Hour", "Date", "Client", "Amount", "Tax", "Interest", "Total",
+            "Notes", "Notes2", "Notes3",    "Notes4"],
+            colModel: [
+                {name: "id", index: "id", align: "right", sorttype: "int"},
+
+                {name: "dayOfHour", index: "dayOfHour", align: "right",
+                formatter: stringFormatter, unformat: stringUnFormatter,
+                formatoptions:{decimalPlaces: 2}},
+
+                {name:"date",index:"date", sorttype:"date", formatter:"date",
+                formatoptions:{newformat: "ISO8601Short"}},
+
+                {name: "name", index: "name", sorttype: "text"},
+
+                {name: "amount", index: "amount", align: "right", sorttype: "float",
+                formatter:"currency", formatoptions:{decimalPlaces: 2, prefix: "$"}},
+
+                {name: "tax", index: "tax", align: "right", sorttype: "float",
+                formatter:"number", formatoptions:{decimalPlaces: 2}},
+
+                {name: "interest", index: "interest", align: "right", sorttype: "float",
+                formatter: percentFormatter, unformat: percentUnFormatter,
+                formatoptions:{decimalPlaces: 2}},
+
+                {name: "total", index: "total", align: "right", sorttype: "float",
+                formatter:"currency", formatoptions:{decimalPlaces: 0, prefix: "$"}},
+
+                {name: "note", index: "note", sortable: true, sorttype:"text"},
+
+                {name: "note2", index: "note2", sorttype: "text"},
+
+                {name: "note3", index: "note3", sorttype: "text"},
+
+                {name: "note4", index: "note4", sorttype: "text"}
+            ],
+            totalRow:  {id: "", date: "", name: "", note: "", amount: 13280, tax: 255, total: 14175.00},
+            multiselect: true,
+            //sortFirstCol: true,
+            useInfiniteScrolling: true,
+            rowTotals: true,
+            colTotals: true,
+            frozenStaticCols: true
+        };
+
+        function percentFormatter(cellValue, options) {
+            if (isNaN(cellValue)) {
+                return "--";
+            }
+            return ( (cellValue * 100).toFixed(options.colModel.formatoptions.decimalPlaces) + "%" );
+        }
+        function percentUnFormatter(cellValue) {
+            return (parseInt(cellValue.replace("%",""),10) / 100);
+        }
+
+        function stringFormatter(cellValue, options) {
+            if (isNaN(cellValue)) {
+                return "--";
+            }
+            return (parseInt(cellValue));
+        }
+        function stringUnFormatter(cellValue) {
+            return (cellValue + "");
+        }
+
+    $("#list").jqGrid(gridOptions); 
 }); 
 </script>
  
